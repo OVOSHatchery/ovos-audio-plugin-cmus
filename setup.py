@@ -49,21 +49,19 @@ def required(requirements_file):
                 if pkg.strip() and not pkg.startswith("#")]
 
 
-PLUGIN_ENTRY_POINT = 'ovos_cmus=ovos_audio_plugin_cmus'
-PLUGIN_CONFIG_ENTRY_POINT = 'ovos_cmus.config=ovos_audio_plugin_cmus:cmusAudioPluginConfig'
+PLUGIN_ENTRY_POINT = 'ovos-media-audio-plugin-cmus=ovos_audio_plugin_cmus.CmusOCPAudioService'
 
 setup(
-    name='ovos-audio-plugin-cmus',
+    name='ovos-media-plugin-cmus',
     version=get_version(),
-    description='cmus plugin for ovos',
-    url='https://github.com/OpenVoiceOS/ovos-audio-plugin-cmus',
+    description='cmus OCP plugin for ovos',
+    url='https://github.com/OpenVoiceOS/ovos-media-plugin-cmus',
     author='JarbasAi',
     author_email='jarbasai@mailfence.com',
     license='Apache-2.0',
     packages=['ovos_audio_plugin_cmus'],
     install_requires=required("requirements/requirements.txt"),
     package_data={'': package_files('ovos_audio_plugin_cmus')},
-    keywords='ovos audio plugin',
-    entry_points={'mycroft.plugin.audioservice': PLUGIN_ENTRY_POINT,
-                  'mycroft.plugin.audioservice.config': PLUGIN_CONFIG_ENTRY_POINT}
+    keywords='ovos audio OCP plugin',
+    entry_points={'opm.media.audio': PLUGIN_ENTRY_POINT}
 )
