@@ -130,8 +130,6 @@ class CmusPlayer:
 class CmusOCPAudioService(AudioPlayerBackend):
     def __init__(self, config, bus=None):
         super().__init__(config, bus)
-        self.index = 0
-        self.tracks = []
         self.player = CmusPlayer()
 
     # audio service
@@ -141,7 +139,7 @@ class CmusOCPAudioService(AudioPlayerBackend):
     def play(self, repeat=False):
         """ Play playlist using Cmus. """
         LOG.debug('CmusService Play')
-        self.player.add_path(self.tracks)
+        self.player.add_path([self._now_playing])
         self.player.play()
 
     def stop(self):
