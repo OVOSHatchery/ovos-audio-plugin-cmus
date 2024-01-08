@@ -3,15 +3,8 @@ import os.path
 import socket
 import subprocess
 
-from ovos_plugin_common_play.ocp.base import OCPAudioPlayerBackend
+from ovos_plugin_manager.templates.media import AudioPlayerBackend
 from ovos_utils.log import LOG
-
-CmusAudioPluginConfig = {
-    "cmus": {
-        "type": "ovos_cmus",
-        "active": True
-    }
-}
 
 
 def program_running(progam):
@@ -134,36 +127,19 @@ class CmusPlayer:
             self.toggle_pause()
 
 
-class OVOSCmusService(OCPAudioPlayerBackend):
-    def __init__(self, config, bus=None, name='ovos_cmus'):
-        super(OVOSCmusService, self).__init__(config, bus)
-        self.name = name
-        self.index = 0
-        self.tracks = []
+class CmusOCPAudioService(AudioPlayerBackend):
+    def __init__(self, config, bus=None):
+        super().__init__(config, bus)
         self.player = CmusPlayer()
 
     # audio service
     def supported_uris(self):
         return ['file', 'http', 'https']
 
-    def clear_list(self):
-        """Clear playlist."""
-        self.index = 0
-        self.tracks = []
-
-    def add_list(self, tracks):
-        """Add tracks to backend's playlist.
-
-        Arguments:
-            tracks (list): list of tracks.
-        """
-        self.tracks += tracks
-
     def play(self, repeat=False):
         """ Play playlist using Cmus. """
         LOG.debug('CmusService Play')
-        self.ocp_start()  # emit ocp state events
-        self.player.add_path(self.tracks)
+        self.player.add_path([self._now_playing])
         self.player.play()
 
     def stop(self):
@@ -171,7 +147,6 @@ class OVOSCmusService(OCPAudioPlayerBackend):
         LOG.info('CmusService Stop')
         if self.player.is_playing():
             self.player.stop()
-            self.ocp_stop()  # emit ocp state events
             return True
         return False
 
@@ -179,13 +154,11 @@ class OVOSCmusService(OCPAudioPlayerBackend):
         """ Pause Cmus playback. """
         if not self.player.is_paused():
             self.player.pause()
-            self.ocp_pause()  # emit ocp state events
 
     def resume(self):
         """ Resume paused playback. """
         if self.player.is_paused():
             self.player.pause()
-            self.ocp_resume()  # emit ocp state events
 
     def lower_volume(self):
         """Lower volume.
@@ -207,7 +180,6 @@ class OVOSCmusService(OCPAudioPlayerBackend):
     def set_track_position(self, milliseconds):
         """
         go to position in milliseconds
-        NOTE: not yet supported by mycroft-core
           Args:
                 milliseconds (int): number of milliseconds of final position
         """
@@ -250,12 +222,3 @@ class OVOSCmusService(OCPAudioPlayerBackend):
         ret['artist'] = ''
         ret['album'] = ''
         return ret
-
-
-def load_service(base_config, bus):
-    backends = base_config.get('backends', [])
-    services = [(b, backends[b]) for b in backends
-                if backends[b]['type'] in ["cmus", 'ovos_cmus'] and
-                backends[b].get('active', False)]
-    instances = [OVOSCmusService(s[1], bus, s[0]) for s in services]
-    return instances
